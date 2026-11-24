@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navbatchilik</title>
+  <link rel="stylesheet" href="navbatchi.css">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="icon" href="icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <header class="header">
+    <button class="back-btn" onclick="window.location.href='index.html'">←</button>
+    <h1>👮 Navbatchilik</h1>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="tayinlash">👤 Navbatchi tayinlash</button>
+    <button class="tab" data-tab="vazifalar">⚙️ Vazifalar</button>
+  </div>
+
+  <main class="container">
+    <!-- 1-TAB -->
+    <div id="tabTayinlash" class="tab-content active">
+      
+      <!-- FAOL NAVBATCHILAR -->
+      <section class="group" id="faolNavbatchilarGroup" style="display:none;">
+        <h2 class="group-head bugungi">🔵 Bugungi navbatchilar</h2>
+        <div id="faolNavbatchilarList" class="list-gap"></div>
+      </section>
+
+      <!-- AVVALGI NAVBATCHILAR -->
+      <section class="group" id="avvalgiNavbatchilarGroup" style="display:none;">
+        <h2 class="group-head avvalgi">⏮️ Avvalgi navbatchilar</h2>
+        <div id="avvalgiNavbatchilarList" class="list-gap"></div>
+      </section>
+
+      <!-- RO'YXAT -->
+      <section class="group">
+        <div class="info-box">
+          <p>Ijarachini tanlang va vazifalarni belgilang. <br><b>Tartib:</b> Eng kam navbatchi bo'lganlar birinchi o'rinda.</p>
+        </div>
+        
+        <div id="ijarachiList" class="list-gap">
+          <p class="loading">Yuklanmoqda...</p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 2-TAB -->
+    <div id="tabVazifalar" class="tab-content">
+      <section class="card">
+        <h2>📋 Vazifalar ro'yxati</h2>
+        <div id="vazifaList" class="list-gap"><p class="loading">Yuklanmoqda...</p></div>
+        
+        <div class="add-vazifa-row">
+          <input type="text" id="yangiVazifa" placeholder="Yangi vazifa nomi">
+          <button class="btn btn-primary" id="btnAddVazifa">+ Qo'sh</button>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="tayinlashModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Vazifalarni biriktirish</h3>
+        <button class="modal-close" onclick="document.getElementById('tayinlashModal').classList.remove('active')">✖</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="tayinlashIjarachiId">
+        <p class="tayinlash-ism" id="tayinlashIsm"></p>
+        <div id="tayinlashVazifalarList" class="vazifalar-check-list"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('tayinlashModal').classList.remove('active')">Bekor qilish</button>
+        <button class="btn btn-primary" id="btnTayinlashSave">Tasdiqlash</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn" data-page="ijarachi">👥 Ijarachi</button>
+    <button class="nav-btn" data-page="xarajat">💸 Xarajat</button>
+    <button class="nav-btn" data-page="hisobot">📊 Hisobot</button>
+    <button class="nav-btn active" data-page="navbatchi">👮 Navbatchi</button>
+  </nav>
+
+  <script src="config.js"></script>
+  <script src="navbatchi.js"></script>
+</body>
+</html>
