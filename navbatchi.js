@@ -1,5 +1,5 @@
 // ============================================
-// NAVBATCHI SAHIFASI — LOGIKA (TO'G'RILANGAN)
+// NAVBATCHI SAHIFASI — LOGIKA (3 TAB, TARIX BILAN)
 // ============================================
 
 const params = new URLSearchParams(window.location.search);
@@ -9,7 +9,6 @@ let vazifalar = [];
 let ijarachiList = [];
 let jarimaMap = {}; 
 let faolNavbatchilar = []; 
-let avvalgiNavbatchilar = [];
 
 // ---------- TABLARNI ALMASHTIRISH ----------
 document.querySelectorAll('.tab').forEach(tab => {
@@ -44,16 +43,12 @@ async function malumotYukla() {
     .order('sana', { ascending: false });
 
   const barchaTarix = tarix || [];
-  faolNavbatchilar = barchaTarix.filter(t => t.sana === bugun);
-  
-  const avvalgiSanalar = [...new Set(barchaTarix.filter(t => t.sana < bugun).map(t => t.sana))];
-  const engYaqinAvvalgiSana = avvalgiSanalar.length > 0 ? avvalgiSanalar[0] : null;
-  avvalgiNavbatchilar = engYaqinAvvalgiSana ? barchaTarix.filter(t => t.sana === engYaqinAvvalgiSana) : [];
+  faolNavbatchilar = barchaTarix.filter(t => t.sana === bugun && t.holat === 'kutilmoqda');
 
   renderFaolNavbatchilar();
-  renderAvvalgiNavbatchilar();
   ijarachiRoyxatRender();
   vazifaRender();
+  renderTarix(barchaTarix);
 }
 
 // ---------- FAOL NAVBATCHILAR RENDER ----------
@@ -76,74 +71,20 @@ function renderFaolNavbatchilar() {
     guruhlangan[n.ijarachi_id].idlar.push(n.id);
   });
 
-  list.innerHTML = Object.values(guruhlangan).map(g => {
-    let tugmalarYokiHolat = '';
-    if (g.holat === 'kutilmoqda') {
-      tugmalarYokiHolat = `
-        <div class="faol-actions">
-          <button class="btn-sm btn-qisman" onclick="holatBelgila('${g.idlar.join(",")}', 'qisman')">⚠️ Qisman</button>
-          <button class="btn-sm btn-bajardi" onclick="holatBelgila('${g.idlar.join(",")}', 'bajardi')">✅ Bajardi</button>
-          <button class="btn-sm btn-bajarmadi" onclick="holatBelgila('${g.idlar.join(",")}', 'bajarmadi')">❌ Bajarmadi</button>
-        </div>
-      `;
-    } else {
-      let badgeText = '';
-      let badgeClass = '';
-      if (g.holat === 'bajardi') { badgeText = '✅ Bajardi'; badgeClass = 'bajardi'; }
-      else if (g.holat === 'bajarmadi') { badgeText = '❌ Bajarmadi'; badgeClass = 'bajarmadi'; }
-      else if (g.holat === 'qisman') { badgeText = '⚠️ Qisman'; badgeClass = 'qisman'; }
-
-      tugmalarYokiHolat = `<span class="holat-badge ${badgeClass}">${badgeText}</span>`;
-    }
-
-    return `
-      <div class="ij-item faol ${g.holat !== 'kutilmoqda' ? g.holat : ''}" style="flex-wrap: wrap;">
-        <div class="ij-avatar">👤</div>
-        <div class="ij-info" style="flex: 1 1 100%;">
-          <h3>${g.ism}</h3>
-          <div class="navbat-soni" style="color: #d97706; font-size:13px;">📋 ${g.vazifalar.join(', ')}</div>
-        </div>
-        ${tugmalarYokiHolat}
+  list.innerHTML = Object.values(guruhlangan).map(g => `
+    <div class="ij-item faol" style="flex-wrap: wrap;">
+      <div class="ij-avatar">👤</div>
+      <div class="ij-info" style="flex: 1 1 100%;">
+        <h3>${g.ism}</h3>
+        <div class="navbat-soni" style="color: #d97706; font-size:13px;">📋 ${g.vazifalar.join(', ')}</div>
       </div>
-    `;
-  }).join('');
-}
-
-// ---------- AVVALGI NAVBATCHILAR RENDER ----------
-function renderAvvalgiNavbatchilar() {
-  const group = document.getElementById('avvalgiNavbatchilarGroup');
-  const list = document.getElementById('avvalgiNavbatchilarList');
-
-  if (avvalgiNavbatchilar.length === 0) {
-    group.style.display = 'none';
-    return;
-  }
-  group.style.display = 'block';
-
-  const guruhlangan = {};
-  avvalgiNavbatchilar.forEach(n => {
-    if (!guruhlangan[n.ijarachi_id]) {
-      guruhlangan[n.ijarachi_id] = { ism: n.ijarachi.ismi, vazifalar: [], holat: n.holat };
-    }
-    guruhlangan[n.ijarachi_id].vazifalar.push(n.vazifa.nomi);
-  });
-
-  list.innerHTML = Object.values(guruhlangan).map(g => {
-    let status = '✅ Bajardi'; let colorClass = 'bajardi';
-    if (g.holat === 'bajarmadi') { status = '❌ Bajarmadi'; colorClass = 'bajarmadi'; }
-    else if (g.holat === 'qisman') { status = '⚠️ Qisman'; colorClass = 'qisman'; }
-
-    return `
-      <div class="ij-item ${colorClass}" style="cursor: default; border-left-color: #94a3b8;">
-        <div class="ij-avatar">👤</div>
-        <div class="ij-info">
-          <h3>${g.ism}</h3>
-          <div class="navbat-soni" style="font-size:12px;">📋 ${g.vazifalar.join(', ')}</div>
-        </div>
-        <span class="holat-badge ${colorClass}">${status}</span>
+      <div class="faol-actions">
+        <button class="btn-sm btn-qisman" onclick="holatBelgila('${g.idlar.join(",")}', 'qisman')">⚠️ Qisman</button>
+        <button class="btn-sm btn-bajardi" onclick="holatBelgila('${g.idlar.join(",")}', 'bajardi')">✅ Bajardi</button>
+        <button class="btn-sm btn-bajarmadi" onclick="holatBelgila('${g.idlar.join(",")}', 'bajarmadi')">❌ Bajarmadi</button>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 }
 
 // ---------- IJARACHILAR RO'YXATI ----------
@@ -211,22 +152,11 @@ document.getElementById('btnTayinlashSave').onclick = async () => {
     await supabaseClient.from('navbatchi_tarix').insert({ ijarachi_id: ijId, vazifa_id: vazifaId, sana: bugun, holat: 'kutilmoqda' });
   }
 
-  // Navbat sonini +1 faqat shu yerda oshiramiz (yangi odam tayinlanganda)
-  const mavjudJarima = jarimaMap[ijId];
-  if (mavjudJarima) {
-    await supabaseClient.from('jarima').update({
-      navbat_soni: (mavjudJarima.navbat_soni || 0) + 1,
-      yangilangan_vaqt: new Date().toISOString()
-    }).eq('ijarachi_id', ijId);
-  } else {
-    await supabaseClient.from('jarima').insert({ ijarachi_id: ijId, qiymat: 0, navbat_soni: 1 });
-  }
-
   document.getElementById('tayinlashModal').classList.remove('active');
   malumotYukla();
 };
 
-// ---------- HOLAT BELGILASH (TUZATILGAN MANTIQ) ----------
+// ---------- HOLAT BELGILASH ----------
 async function holatBelgila(navIdlarStr, holat) {
   const navIds = navIdlarStr.split(',');
   const nav = faolNavbatchilar.find(n => n.id === navIds[0]);
@@ -236,27 +166,64 @@ async function holatBelgila(navIdlarStr, holat) {
     await supabaseClient.from('navbatchi_tarix').update({ holat }).eq('id', id);
   }
 
-  // FAQAT "BAJARDI" BO'LGANDA NAVBAT SONI +1 BO'LADI
   const mavjudJarima = jarimaMap[nav.ijarachi_id] || { qiymat: 0, navbat_soni: 0 };
   let yangiJarima = mavjudJarima.qiymat || 0;
   let yangiNavbat = mavjudJarima.navbat_soni || 0;
 
   if (holat === 'bajardi') {
-    yangiNavbat += 1; // Navbatchilik soni oshadi
+    yangiNavbat += 1;
   } else if (holat === 'bajarmadi') {
-    yangiJarima += 2; // Faqat jarima oshadi, navbat o'zgarmaydi
+    yangiJarima += 2;
   } else if (holat === 'qisman') {
-    yangiJarima += 1; // Faqat jarima oshadi, navbat o'zgarmaydi
+    yangiJarima += 1;
   }
 
   await supabaseClient.from('jarima').upsert({
-    ijarachi_id: nav.ijarachi_id,
-    qiymat: yangiJarima,
-    navbat_soni: yangiNavbat,
-    yangilangan_vaqt: new Date().toISOString()
+    ijarachi_id: nav.ijarachi_id, qiymat: yangiJarima, navbat_soni: yangiNavbat, yangilangan_vaqt: new Date().toISOString()
   }, { onConflict: 'ijarachi_id' });
 
   malumotYukla();
+}
+
+// ---------- 3-TAB: TARIXNI RENDER QILISH ----------
+function renderTarix(barchaTarix) {
+  const el = document.getElementById('tarixList');
+  
+  const bajarilganlar = barchaTarix.filter(t => t.holat !== 'kutilmoqda').slice(0, 10);
+
+  if (bajarilganlar.length === 0) {
+    el.innerHTML = '<p class="loading">Tarix bo\'sh.</p>';
+    return;
+  }
+
+  el.innerHTML = bajarilganlar.map(t => {
+    let holatText = ''; let holatClass = ''; let jarimaText = '';
+
+    if (t.holat === 'bajardi') {
+      holatText = '✅ Bajardi'; holatClass = 'bajardi'; jarimaText = '+1 navbat';
+    } else if (t.holat === 'bajarmadi') {
+      holatText = '❌ Bajarmadi'; holatClass = 'bajarmadi'; jarimaText = '+2 jarima';
+    } else if (t.holat === 'qisman') {
+      holatText = '⚠️ Qisman'; holatClass = 'qisman'; jarimaText = '+1 jarima';
+    }
+
+    const d = new Date(t.sana);
+    const sanaStr = `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+
+    return `
+      <div class="tarix-card">
+        <div class="tarix-head">
+          <div class="tarix-ism">👤 ${t.ijarachi ? t.ijarachi.ismi : 'Noma\'lum'}</div>
+          <div class="tarix-sana">${sanaStr}</div>
+        </div>
+        <div class="tarix-vazifa">📋 ${t.vazifa ? t.vazifa.nomi : 'Noma\'lum'}</div>
+        <div class="tarix-footer">
+          <span class="tarix-holat ${holatClass}">${holatText}</span>
+          <span class="tarix-jarima">${jarimaText}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ---------- 2-TAB: VAZIFALAR ----------
