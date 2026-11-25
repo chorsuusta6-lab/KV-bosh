@@ -1,14 +1,15 @@
 // ============================================
-// SERVICE WORKER — PWA OFFLINE + KESH
+// SERVICE WORKER — AVTOMATIK YANGILANISH
 // ============================================
 
+// Versiyani har safar kodni yangilaganingizda o'zgartirib turing (masalan v1 dan v2 ga)
 const CACHE_NAME = 'kv-boshqaruv-v1';
 
-// Keshga olinadigan fayllar
 const CACHE_FILES = [
+  './',
   'index.html',
-  'asosiy.css',
-  'asosiy.js',
+  'index.css',
+  'index.js',
   'ijarachi.html',
   'ijarachi.css',
   'ijarachi.js',
@@ -27,57 +28,70 @@ const CACHE_FILES = [
   'icon-512.png'
 ];
 
-// O'rnatish — fayllarni keshga olish
+// 1. O'rnatish — fayllarni keshga olish
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(CACHE_FILES).catch(err => {
-        console.warn('Ba\'zi fayllar keshga olinmadi:', err);
-      });
+      return cache.addAll(CACHE_FILES);
     })
   );
-  self.skipWaiting();
+  // Yangi Service Worker darhol faollashishini kutmaslik uchun
+  self.skipWaiting(); 
 });
 
-// Faollashtirish — eski keshlarni tozalash
+// 2. Faollashtirish — eski keshlarni tozalash
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Eski kesh o\'chirildi:', cache);
+            return caches.delete(cache);
+          }
+        })
       );
     })
   );
   self.clients.claim();
 });
 
-// So'rovlarni ushlash
+// 3. Tarmoq so'rovlarini ushlash
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Supabase so'rovlari — faqat online (keshlamaymiz)
-  if (url.hostname.includes('supabase.co')) {
-    return; // brauzer o'zi hal qiladi
+  // Supabase va tashqi API so'rovlarini keshlamaymiz (har doim onlayn bo'lishi kerak)
+  if (url.hostname.includes('supabase.co') || url.hostname.includes('jsdelivr.net')) {
+    return; 
   }
 
-  // Boshqa so'rovlar — avval kesh, keyin tarmoq
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-
-      return fetch(event.request).then((response) => {
-        // Muvaffaqiyatli javobni keshga ol
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => {
-        // Offline — asosiy.html ni qaytarish
-        if (event.request.mode === 'navigate') {
-          return caches.match('index.html');
-        }
-      });
-    })
-  );
+  // HTML fayllar uchun: "Tarmoq birinchi, kesh zaxira" (Network First)
+  // Bu GitHub'dagi eng so'nggi yangilanishlarni darhol ko'rish uchun kerak
+  if (event.request.mode === 'navigate' || event.request.headers.get('accept').includes('text/html')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          // Yangi javobni keshga saqlash
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return networkResponse;
+        })
+        .catch(() => {
+          // Agar internet bo'lmasa, keshdan qaytarish
+          return caches.match(event.request) || caches.match('index.html');
+        })
+    );
+  } else {
+    // Boshqa fayllar (CSS, JS, rasmlar) uchun: "Kesh birinchi, tarmoq zaxira" (Cache First)
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) return cachedResponse;
+        return fetch(event.request).then((networkResponse) => {
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          return networkResponse;
+        });
+      })
+    );
+  }
 });
