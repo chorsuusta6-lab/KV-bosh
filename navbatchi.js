@@ -189,7 +189,7 @@ async function holatBelgila(navIdlarStr, holat) {
 function renderTarix(barchaTarix) {
   const el = document.getElementById('tarixList');
   
-  const bajarilganlar = barchaTarix.filter(t => t.holat !== 'kutilmoqda').slice(0, 10);
+  const bajarilganlar = barchaTarix.filter(t => t.holat !== 'kutilmoqda').slice(0, 20);
 
   if (bajarilganlar.length === 0) {
     el.innerHTML = '<p class="loading">Tarix bo\'sh.</p>';
