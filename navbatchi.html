@@ -17,28 +17,22 @@
     <h1>👮 Navbatchilik</h1>
   </header>
 
+  <!-- 3 TA TAB -->
   <div class="tabs">
-    <button class="tab active" data-tab="tayinlash">👤 Navbatchi tayinlash</button>
+    <button class="tab active" data-tab="tayinlash">👤 Tayinlash</button>
     <button class="tab" data-tab="vazifalar">⚙️ Vazifalar</button>
+    <button class="tab" data-tab="tarix">⏮️ Tarix</button>
   </div>
 
   <main class="container">
-    <!-- 1-TAB -->
+    <!-- 1-TAB: TAYINLASH -->
     <div id="tabTayinlash" class="tab-content active">
       
-      <!-- FAOL NAVBATCHILAR -->
       <section class="group" id="faolNavbatchilarGroup" style="display:none;">
         <h2 class="group-head bugungi">🔵 Bugungi navbatchilar</h2>
         <div id="faolNavbatchilarList" class="list-gap"></div>
       </section>
 
-      <!-- AVVALGI NAVBATCHILAR -->
-      <section class="group" id="avvalgiNavbatchilarGroup" style="display:none;">
-        <h2 class="group-head avvalgi">⏮️ Avvalgi navbatchilar</h2>
-        <div id="avvalgiNavbatchilarList" class="list-gap"></div>
-      </section>
-
-      <!-- RO'YXAT -->
       <section class="group">
         <div class="info-box">
           <p>Ijarachini tanlang va vazifalarni belgilang. <br><b>Tartib:</b> Eng kam navbatchi bo'lganlar birinchi o'rinda.</p>
@@ -48,10 +42,9 @@
           <p class="loading">Yuklanmoqda...</p>
         </div>
       </section>
-
     </div>
 
-    <!-- 2-TAB -->
+    <!-- 2-TAB: VAZIFALAR -->
     <div id="tabVazifalar" class="tab-content">
       <section class="card">
         <h2>📋 Vazifalar ro'yxati</h2>
@@ -60,6 +53,18 @@
         <div class="add-vazifa-row">
           <input type="text" id="yangiVazifa" placeholder="Yangi vazifa nomi">
           <button class="btn btn-primary" id="btnAddVazifa">+ Qo'sh</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- 3-TAB: TARIX -->
+    <div id="tabTarix" class="tab-content">
+      <section class="group">
+        <div class="info-box" style="background:#f8fafc; border-left-color:#94a3b8; color:#334155;">
+          <p>Oxirgi 10 ta bajarilgan navbatchiliklar tarixi.</p>
+        </div>
+        <div id="tarixList" class="list-gap">
+          <p class="loading">Yuklanmoqda...</p>
         </div>
       </section>
     </div>
@@ -95,4 +100,4 @@
   <script src="config.js"></script>
   <script src="navbatchi.js"></script>
 </body>
-</html>
+</html>   
